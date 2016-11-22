@@ -8,3 +8,4 @@ http://smarterpoland.pl/index.php/2016/10/ggmail-ggplot2-data-from-gmail-forecas
 
 ## R-script
 
+https://rawgithub.com/pbiecek/ggmail/master/ggmail.html
