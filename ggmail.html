@@ -126,7 +126,8 @@ $(document).ready(function () {
 <ul>
 <li><a href="#get-emails-from-gmail">1. Get emails from gmail</a></li>
 <li><a href="#filtler-out-headers">2. Filtler out headers</a></li>
-<li><a href="#read-the-data">Read the data</a></li>
+<li><a href="#read-the-data">3. Read the data</a></li>
+<li><a href="#ggplot-it">4. ggplot it</a></li>
 </ul>
 </div>
 
@@ -144,7 +145,7 @@ $(document).ready(function () {
 <pre><code>cat GGmail.mbox  | grep -e &quot;^Date:&quot; -e &quot;^Subject:&quot; -e &quot;^From:&quot; -e &quot;^To:&quot; &gt; GGheaders.txt</code></pre>
 </div>
 <div id="read-the-data" class="section level2">
-<h2>Read the data</h2>
+<h2>3. Read the data</h2>
 <p>Reading and cleaning. Here I am using only timestamps.</p>
 <pre class="r"><code>lines &lt;- readLines(&quot;GGheaders.txt&quot;)
 lines &lt;- grep(lines, pattern=&quot;^Date:&quot;, value = TRUE)
@@ -177,9 +178,11 @@ head(tt)</code></pre>
 ## 2001-12-31 2005-08-18 2005-09-18 2005-09-19 2007-03-27 2007-03-28 
 ##          1          1          1          1          1          1</code></pre>
 <pre class="r"><code># dirty dirty dirty
-tt &lt;- tt[45:3350]
-
-# time series object
+tt &lt;- tt[45:3350]</code></pre>
+</div>
+<div id="ggplot-it" class="section level2">
+<h2>4. ggplot it</h2>
+<pre class="r"><code># time series object
 tts &lt;- ts(tt, frequency = 356, start=c(2007, 52))
 
 autoplot(tts) +

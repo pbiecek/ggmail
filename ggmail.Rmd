@@ -32,7 +32,7 @@ The fastest way to do this is to use grep function in the shell
 cat GGmail.mbox  | grep -e "^Date:" -e "^Subject:" -e "^From:" -e "^To:" > GGheaders.txt
 ```
 
-## Read the data
+## 3. Read the data
 
 Reading and cleaning. Here I am using only timestamps.
 
@@ -59,6 +59,11 @@ head(tt)
 # dirty dirty dirty
 tt <- tt[45:3350]
 
+```
+
+## 4. ggplot it
+
+```{r}
 # time series object
 tts <- ts(tt, frequency = 356, start=c(2007, 52))
 
