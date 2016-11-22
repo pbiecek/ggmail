@@ -1,0 +1,89 @@
+---
+title: "ggmail + forecast = how many emails I will get tomorrow?"
+author: "Przemyslaw Biecek"
+date: "22/11/2016"
+output: 
+  html_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Below you will find information how to download emails from gmail and how to use R to process these emails
+
+Find more details here: http://smarterpoland.pl/index.php/2016/10/ggmail-ggplot2-data-from-gmail-forecast/
+
+## 1. Get emails from gmail
+
+Follow [this link](https://support.google.com/accounts/answer/3024190?hl=en) to download the data from your gmail account as a single mbox file.
+
+It may be large (15GB in my case).
+
+## 2. Filtler out headers
+
+Since I am not going to analyse the content I will remove everything except Subject, Date and Recipent.
+
+The fastest way to do this is to use grep function in the shell
+
+```
+cat GGmail.mbox  | grep -e "^Date:" -e "^Subject:" -e "^From:" -e "^To:" > GGheaders.txt
+```
+
+## Read the data
+
+Reading and cleaning. Here I am using only timestamps.
+
+```{r, warning=FALSE, message=FALSE}
+lines <- readLines("GGheaders.txt")
+lines <- grep(lines, pattern="^Date:", value = TRUE)
+head(lines)
+
+dates <- substr(lines, 11, 1000)
+head(dates)
+
+library("lubridate")
+library("forecast")
+library("ggplot2")
+library("forcats")
+
+daty_clean <- dmy_hms(dates)
+head(daty_clean)
+
+# daily agregates
+tt <- table(substr(daty_clean, 1, 10))
+head(tt)
+
+# dirty dirty dirty
+tt <- tt[45:3350]
+
+# time series object
+tts <- ts(tt, frequency = 356, start=c(2007, 52))
+
+autoplot(tts) +
+  geom_smooth(method="loess", span=.03, se=F) +
+  xlab("") + ylab("Number of emails per day") +
+  ggtitle("Mailbox statistics")
+
+# Some boxplots
+tts <- ts(c(tail(tts, 356)), frequency = 356, start=c(2007, 52))
+dftts <- data.frame(mails = tts, date=ymd(names(tts)))
+dftts$dow <- wday(dftts$date, label = T, abbr = F)
+ggplot(dftts, aes(factor(dow), mails, fill=dow)) + geom_boxplot(coef=100) +
+  geom_violin(alpha=0.5, scale = "width") +
+  theme(legend.position="none") + xlab("") + ylab("Number of mails per day") +
+  ggtitle("Monday's flood - mailbox statistics year 2016\n") +
+  scale_y_continuous(limits=c(0,260), expand = c(0,0.5)) + coord_flip()
+
+
+dftts$m <- month(dftts$date, label = T, abbr = F)
+dftts$m <- fct_rev(dftts$m)
+ggplot(dftts[substr(dftts$date, 1, 4) == "2016",], aes(factor(m), mails, fill=m)) + geom_boxplot(coef=100) +
+  geom_violin(alpha=0.5, scale = "width") +
+  theme(legend.position="none") + xlab("") + ylab("Number of emails per day") +
+  ggtitle("The first month of each semester could be hard \n mailbox statistics year 2016") +
+  scale_y_continuous(limits=c(0,260), expand = c(0,0.5)) + coord_flip()
+
+```
